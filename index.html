@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <!-- Vue Framework -->
+    <!-- production version, optimized for size and speed -->
+    <!--<script src="https://cdn.jsdelivr.net/npm/vue"></script>-->
+    <!-- development version, includes helpful console warnings -->
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+    <!-- jQuery -->
+    <!--<script src="jQuery-3.3.1/jquery-3.3.1.min.js"></script>-->
+
+    <!-- Bootstrap -->
+    <link href="bootstrap-4.1.0-dist/css/bootstrap.min.css" rel="stylesheet">
+
+</head>
+<body>
+
+<div id="app">
+
+    <nav id="nav" class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="#">Vue-PlanBoard</a>
+        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+            <div id="navItems" class="navbar-nav">
+                <a v-for="item in navItems" :id="item.id" class="nav-item nav-link" v-bind:class="{active: item.active}"  v-on:click="clickNavItem" style="cursor: pointer;">{{item.item}}</a>
+            </div>
+        </div>
+    </nav>
+
+</div>
+
+<!-- Main App Vue Instance -->
+<!--<script src="js/app.js"></script>-->
+
+<script>
+
+    // Define a new component called button-counter
+    Vue.component('nav', {
+        data: function () {
+            return {}
+        },
+//        template: '<button v-on:click="count++">You clicked me {{ count }} times.</button>'
+    })
+
+    var app = new Vue({
+        el: '#app',
+        data:{
+            navItems:[
+                {id:'navItem-1',item:'Backlog',active:true},
+                {id:'navItem-2',item:'ActiveSprint',active:false}
+            ]
+        },
+        methods: {
+            clickNavItem:function (e) {
+                this.$data.navItems.forEach(function (i, k) { i.active = (e.target.id === i.id) ? true : false ; });
+            }
+        }
+
+    })
+
+
+</script>
+
+</body>
+</html>

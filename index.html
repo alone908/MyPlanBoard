@@ -19,55 +19,37 @@
 </head>
 <body>
 
+
+
 <div id="app">
 
     <navbar v-bind:input-data="compoDisplay"></navbar>
 
-    <div id="backlogContainer" style="width: 70%; margin: 25px">
-        <div id="bklStoryContainer" style="margin: 10px 20px;padding-bottom: 20px;">
+    <div style="width: 100%">
 
-            <div style="height:32px;border: 1px solid #DBDDE2;margin-top:-1px;font-size:14px;cursor:move;position: relative;">
-                <div style="padding-left: 5px;box-sizing: border-box;overflow: hidden;position: relative;white-space: nowrap">
-                    <div style="height:22px; margin:5px 0px;line-height: 22px;">
-                        <span style="display: inline-block;margin-left: 16px;"><img src="images/storyicon.svg" style="vertical-align: text-bottom"></span>
-                        <span style="display: inline-block;margin-left: 16px;">add a page where admins can create new USB campaign. It will be a single page with campaign name, location, the education page that will be displayed when macro is run (similar to randomizer only select from list). </span>
-                    </div>
-                </div>
-                <div style="position: absolute;right: 0px;top: 5px;height: 22px;background: white;padding:  0px 5px 0px 20px;">
-                    <span>PHIS-5094</span>
-                </div>
-                <div style="background-color: #cc0000;width: 2px;left: 2px;top: 2px;bottom: 2px;height:auto;position: absolute;text-indent: -9999em"></div>
+        <div style="display: inline-block;width: 80%;float: left;">
+
+            <div style="position:relative;top: 0px;left: 0px;">
+                <storylist-title title="TDC Sprint 35"></storylist-title>
+                <story-list v-bind:status="['toDo','inProgress','qa','done']" v-bind:detail-story-key="detailStoryKey"></story-list>
             </div>
-            <div style="height:32px;border: 1px solid #DBDDE2;margin-top:-1px;font-size:14px;cursor:move;position: relative;">
-                <div style="padding-left: 5px;box-sizing: border-box;overflow: hidden;position: relative;white-space: nowrap">
-                    <div style="height:22px; margin:5px 0px;line-height: 22px;">
-                        <span style="display: inline-block;margin-left: 16px;"><img src="images/storyicon.svg" style="vertical-align: text-bottom"></span>
-                        <span style="display: inline-block;margin-left: 16px;">add a page where admins can create new USB campaign. It will be a single page with campaign name, location, the education page that will be displayed when macro is run (similar to randomizer only select from list). </span>
-                    </div>
-                </div>
-                <div style="position: absolute;right: 0px;top: 5px;height: 22px;background: white;padding:  0px 5px 0px 20px;">
-                    <span>PHIS-5094</span>
-                </div>
-                <div style="background-color: #cc0000;width: 2px;left: 2px;top: 2px;bottom: 2px;height:auto;position: absolute;text-indent: -9999em"></div>
-            </div>
-            <div style="height:32px;border: 1px solid #DBDDE2;margin-top:-1px;font-size:14px;cursor:move;position: relative;">
-                <div style="padding-left: 5px;box-sizing: border-box;overflow: hidden;position: relative;white-space: nowrap">
-                    <div style="height:22px; margin:5px 0px;line-height: 22px;">
-                        <span style="display: inline-block;margin-left: 16px;"><img src="images/storyicon.svg" style="vertical-align: text-bottom"></span>
-                        <span style="display: inline-block;margin-left: 16px;">add a page where admins can create new USB campaign. It will be a single page with campaign name, location, the education page that will be displayed when macro is run (similar to randomizer only select from list). </span>
-                    </div>
-                </div>
-                <div style="position: absolute;right: 0px;top: 5px;height: 22px;background: white;padding:  0px 5px 0px 20px;">
-                    <span>PHIS-5094</span>
-                </div>
-                <div style="background-color: #cc0000;width: 2px;left: 2px;top: 2px;bottom: 2px;height:auto;position: absolute;text-indent: -9999em"></div>
+
+            <div style="position: relative;top: 0px;left: 0px;">
+                <storylist-title title="Backlog"></storylist-title>
+                <story-list v-bind:status="['backlog']" v-bind:detail-story-key="detailStoryKey"></story-list>
             </div>
 
         </div>
 
-    </div>
+        <div style="display: inline-block;width: 20%;float: right;">
+            <story-detail v-bind:detail-story-key="detailStoryKey"></story-detail>
+        </div>
 
+    </div>
+    
 </div>
+
+<script src="js/app.data.js"></script>
 
 <!-- Main App Vue Instance -->
 <!--<script src="js/app.js"></script>-->
@@ -109,6 +91,58 @@
        '</nav>'
     })
 
+    Vue.component('storylist-title',{
+        data: function(){ return {} },
+        props:['title'],
+        template:'<div style="margin: 10px 20px;"><span>{{title}}</span></div>'
+    })
+
+    Vue.component('story-list',{
+        data: function () {
+            return {
+                stories:stories
+            }
+        },
+        props:['status','detailStoryKey'],
+        template:'<div style="margin: 10px 20px;padding-bottom: 20px;">' +
+        '                    <div id="" v-for="story in stories" v-if="status.indexOf(story.status) !== -1" v-on:click="clicklist(story.key,detailStoryKey)" style="height:32px;border: 1px solid #DBDDE2;margin-top:-1px;font-size:14px;cursor:move;position: relative;">\n' +
+        '                        <div style="padding-left: 5px;box-sizing: border-box;overflow: hidden;position: relative;white-space: nowrap">\n' +
+        '                            <div style="height:22px; margin:5px 0px;line-height: 22px;">\n' +
+        '                                <span style="display: inline-block;margin-left: 16px;"><img src="images/storyicon.svg" style="vertical-align: text-bottom"></span>\n' +
+        '                                <span style="display: inline-block;margin-left: 16px;">{{story.description}}</span>\n' +
+        '                            </div>\n' +
+        '                        </div>\n' +
+        '                        <div style="position: absolute;right: 0px;top: 5px;height: 22px;background: white;padding:  0px 5px 0px 20px;">\n' +
+        '                            <span>{{story.id}}</span>\n' +
+        '                        </div>\n' +
+        '                        <div style="background-color: #cc0000;width: 2px;left: 2px;top: 2px;bottom: 2px;height:auto;position: absolute;text-indent: -9999em"></div>\n' +
+        '                    </div>' +
+        '</div>',
+        methods:{
+            clicklist:function(key,detailStoryKey){
+                this.$root.$data.detailStoryKey = key;
+            }
+        }
+    })
+
+    Vue.component('story-detail',{
+        data: function (){
+            return {
+                stories:stories
+            }
+        },
+        props:['detailStoryKey'],
+        template:'<div style="padding-top: 10px">\n' +
+        '                <span style=""><img src="images/storyicon.svg" style="vertical-align: text-bottom">{{stories[detailStoryKey].id}}</span>\n' +
+        '                <div style="margin-top:10px;font-size:18px;font-weight:bold;white-space: normal;">{{stories[detailStoryKey].description}}</div>\n' +
+        '                <div style="margin-top:10px;font-size:14px;font-weight:bold;white-space: normal;">Project:&nbsp;{{stories[detailStoryKey].project}}</div>\n' +
+        '                <div style="margin-top:10px;font-size:14px;font-weight:bold;white-space: normal;">Status:&nbsp;{{stories[detailStoryKey].status}}</div>\n' +
+        '\n' +
+        '            </div>'
+    })
+
+
+
     var app = new Vue({
         el: '#app',
         data:{
@@ -116,15 +150,30 @@
                 navbar:true,
                 navItems:true,
             },
-            compoD:'none'
+            stories:stories,
+            detailStoryKey:0
         },
-        methods: {
+        methods:{
 
         }
 
     })
 
     console.log(app);
+
+    function allowDrop(ev) {
+        ev.preventDefault();
+    }
+
+    function drag(ev) {
+        ev.dataTransfer.setData("text", ev.target.id);
+    }
+
+    function drop(ev) {
+        ev.preventDefault();
+        var data = ev.dataTransfer.getData("text");
+        ev.target.appendChild(document.getElementById(data));
+    }
 
 </script>
 

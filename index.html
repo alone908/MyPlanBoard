@@ -46,7 +46,7 @@
         </div>
 
     </div>
-    
+
 </div>
 
 <script src="js/app.data.js"></script>
@@ -134,11 +134,18 @@
         props:['detailStoryKey'],
         template:'<div style="padding-top: 10px">\n' +
         '                <span style=""><img src="images/storyicon.svg" style="vertical-align: text-bottom">{{stories[detailStoryKey].id}}</span>\n' +
-        '                <div style="margin-top:10px;font-size:18px;font-weight:bold;white-space: normal;">{{stories[detailStoryKey].description}}</div>\n' +
+        '                <div style="position:relative;margin-top:10px;font-size:18px;font-weight:bold;white-space: normal;padding: 5px;">{{stories[detailStoryKey].description}}' +
+        '                   <textarea v-model="stories[detailStoryKey].description" style="width: 100%;height: 100%;position: absolute;top:0px;left:0px;white-space: normal;padding: 5px;border-color: #cc0000;border-radius: 5px;overflow: hidden;"></textarea>' +
+        '                </div>\n' +
         '                <div style="margin-top:10px;font-size:14px;font-weight:bold;white-space: normal;">Project:&nbsp;{{stories[detailStoryKey].project}}</div>\n' +
         '                <div style="margin-top:10px;font-size:14px;font-weight:bold;white-space: normal;">Status:&nbsp;{{stories[detailStoryKey].status}}</div>\n' +
         '\n' +
-        '            </div>'
+        '            </div>',
+        methods:{
+            input:function(){
+
+            }
+        }
     })
 
 

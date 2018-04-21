@@ -21,14 +21,51 @@
 
 <div id="app">
 
-    <nav id="navbar" class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <a class="navbar-brand" href="#">Vue-PlanBoard</a>
-        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-            <div id="navItems" class="navbar-nav">
-                <a v-for="item in navItems" :id="item.id" class="nav-item nav-link" v-bind:class="{active: item.active}"  v-on:click="clickNavItem" style="cursor: pointer;">{{item.item}}</a>
+    <navbar v-bind:input-data="compoDisplay"></navbar>
+
+    <div id="backlogContainer" style="width: 70%; margin: 25px">
+        <div id="bklStoryContainer" style="margin: 10px 20px;padding-bottom: 20px;">
+
+            <div style="height:32px;border: 1px solid #DBDDE2;margin-top:-1px;font-size:14px;cursor:move;position: relative;">
+                <div style="padding-left: 5px;box-sizing: border-box;overflow: hidden;position: relative;white-space: nowrap">
+                    <div style="height:22px; margin:5px 0px;line-height: 22px;">
+                        <span style="display: inline-block;margin-left: 16px;"><img src="images/storyicon.svg" style="vertical-align: text-bottom"></span>
+                        <span style="display: inline-block;margin-left: 16px;">add a page where admins can create new USB campaign. It will be a single page with campaign name, location, the education page that will be displayed when macro is run (similar to randomizer only select from list). </span>
+                    </div>
+                </div>
+                <div style="position: absolute;right: 0px;top: 5px;height: 22px;background: white;padding:  0px 5px 0px 20px;">
+                    <span>PHIS-5094</span>
+                </div>
+                <div style="background-color: #cc0000;width: 2px;left: 2px;top: 2px;bottom: 2px;height:auto;position: absolute;text-indent: -9999em"></div>
             </div>
+            <div style="height:32px;border: 1px solid #DBDDE2;margin-top:-1px;font-size:14px;cursor:move;position: relative;">
+                <div style="padding-left: 5px;box-sizing: border-box;overflow: hidden;position: relative;white-space: nowrap">
+                    <div style="height:22px; margin:5px 0px;line-height: 22px;">
+                        <span style="display: inline-block;margin-left: 16px;"><img src="images/storyicon.svg" style="vertical-align: text-bottom"></span>
+                        <span style="display: inline-block;margin-left: 16px;">add a page where admins can create new USB campaign. It will be a single page with campaign name, location, the education page that will be displayed when macro is run (similar to randomizer only select from list). </span>
+                    </div>
+                </div>
+                <div style="position: absolute;right: 0px;top: 5px;height: 22px;background: white;padding:  0px 5px 0px 20px;">
+                    <span>PHIS-5094</span>
+                </div>
+                <div style="background-color: #cc0000;width: 2px;left: 2px;top: 2px;bottom: 2px;height:auto;position: absolute;text-indent: -9999em"></div>
+            </div>
+            <div style="height:32px;border: 1px solid #DBDDE2;margin-top:-1px;font-size:14px;cursor:move;position: relative;">
+                <div style="padding-left: 5px;box-sizing: border-box;overflow: hidden;position: relative;white-space: nowrap">
+                    <div style="height:22px; margin:5px 0px;line-height: 22px;">
+                        <span style="display: inline-block;margin-left: 16px;"><img src="images/storyicon.svg" style="vertical-align: text-bottom"></span>
+                        <span style="display: inline-block;margin-left: 16px;">add a page where admins can create new USB campaign. It will be a single page with campaign name, location, the education page that will be displayed when macro is run (similar to randomizer only select from list). </span>
+                    </div>
+                </div>
+                <div style="position: absolute;right: 0px;top: 5px;height: 22px;background: white;padding:  0px 5px 0px 20px;">
+                    <span>PHIS-5094</span>
+                </div>
+                <div style="background-color: #cc0000;width: 2px;left: 2px;top: 2px;bottom: 2px;height:auto;position: absolute;text-indent: -9999em"></div>
+            </div>
+
         </div>
-    </nav>
+
+    </div>
 
 </div>
 
@@ -37,30 +74,57 @@
 
 <script>
 
-    // Define a new component called button-counter
+    Vue.component('nav-items',{
+        data: function () {
+            return {
+                navItems:[
+                    {id:'navItem-1',item:'Backlog',active:true},
+                    {id:'navItem-2',item:'ActiveSprint',active:false}
+                ],
+                itemStyle:{cursor:'pointer'}
+            }
+        },
+        props:['inputData'],
+        methods: {
+            clickNavItem:function (e) {
+                this.$data.navItems.forEach(function (i, k) { i.active = (e.target.id === i.id) ? true : false ; });
+            }
+        },
+        template: '<div class="navbar-nav" v-if="inputData.navItems"><a v-for="item in navItems" :id="item.id" class="nav-item nav-link" v-bind:class="{active: item.active}" v-bind:style="itemStyle" v-on:click="clickNavItem">{{item.item}}</a></div>'
+    })
+
     Vue.component('navbar', {
         data: function () {
-            return {}
+            return {
+                brand:'Vue-PlanBoard',
+            }
         },
-//        template: '<button v-on:click="count++">You clicked me {{ count }} times.</button>'
+        props:['inputData'],
+        template: '' +
+       '<nav class="navbar navbar-expand-lg navbar-dark bg-dark" v-if="inputData.navbar">\n' +
+       '    <a class="navbar-brand" href="#">{{brand}}</a>\n' +
+       '    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">\n' +
+       '        <nav-items v-bind:input-data="inputData"></nav-items>\n' +
+       '    </div>\n' +
+       '</nav>'
     })
 
     var app = new Vue({
         el: '#app',
         data:{
-            navItems:[
-                {id:'navItem-1',item:'Backlog',active:true},
-                {id:'navItem-2',item:'ActiveSprint',active:false}
-            ]
+            compoDisplay:{
+                navbar:true,
+                navItems:true,
+            },
+            compoD:'none'
         },
         methods: {
-            clickNavItem:function (e) {
-                this.$data.navItems.forEach(function (i, k) { i.active = (e.target.id === i.id) ? true : false ; });
-            }
+
         }
 
     })
 
+    console.log(app);
 
 </script>
 

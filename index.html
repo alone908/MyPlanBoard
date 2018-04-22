@@ -31,12 +31,12 @@
 
             <div style="position:relative;top: 0px;left: 0px;">
                 <storylist-title title="TDC Sprint 35"></storylist-title>
-                <story-list v-bind:status="['toDo','inProgress','qa','done']" v-bind:detail-story-key="detailStoryKey"></story-list>
+                <story-list v-bind:status="['toDo','inProgress','qa','done']" v-bind:detail-story-key="detailStoryKey" droptype="sprint"></story-list>
             </div>
 
             <div style="position: relative;top: 0px;left: 0px;">
                 <storylist-title title="Backlog"></storylist-title>
-                <story-list v-bind:status="['backlog']" v-bind:detail-story-key="detailStoryKey"></story-list>
+                <story-list v-bind:status="['backlog']" v-bind:detail-story-key="detailStoryKey" droptype="backlog"></story-list>
             </div>
 
         </div>
@@ -103,16 +103,16 @@
                 stories:stories
             }
         },
-        props:['status','detailStoryKey'],
-        template:'<div style="margin: 10px 20px;padding-bottom: 20px;">' +
-        '                    <div id="" v-for="story in stories" v-if="status.indexOf(story.status) !== -1" v-on:click="clicklist(story.key,detailStoryKey)" style="height:32px;border: 1px solid #DBDDE2;margin-top:-1px;font-size:14px;cursor:move;position: relative;">\n' +
+        props:['status','detailStoryKey','droptype'],
+        template:'<div style="margin: 10px 20px;padding-bottom: 20px;" v-on:drop="drop" v-on:dragover="dragover" :data-droptype="droptype">' +
+        '                    <div :id="story.id" v-for="story in stories" v-if="status.indexOf(story.status) !== -1" v-on:click="clicklist(story.key,detailStoryKey)" v-on:dragstart="drag" v-on:dragend="dragend" :data-key="story.key" draggable="true" style="height:32px;border: 1px solid #DBDDE2;margin-top:-1px;font-size:14px;cursor:move;position: relative;">\n' +
         '                        <div style="padding-left: 5px;box-sizing: border-box;overflow: hidden;position: relative;white-space: nowrap">\n' +
         '                            <div style="height:22px; margin:5px 0px;line-height: 22px;">\n' +
         '                                <span style="display: inline-block;margin-left: 16px;"><img src="images/storyicon.svg" style="vertical-align: text-bottom"></span>\n' +
         '                                <span style="display: inline-block;margin-left: 16px;">{{story.description}}</span>\n' +
         '                            </div>\n' +
         '                        </div>\n' +
-        '                        <div style="position: absolute;right: 0px;top: 5px;height: 22px;background: white;padding:  0px 5px 0px 20px;">\n' +
+        '                        <div style="position: absolute;right: 0px;top: 5px;height: 22px;padding:  0px 5px 0px 20px;">\n' +
         '                            <span>{{story.id}}</span>\n' +
         '                        </div>\n' +
         '                        <div style="background-color: #cc0000;width: 2px;left: 2px;top: 2px;bottom: 2px;height:auto;position: absolute;text-indent: -9999em"></div>\n' +
@@ -121,6 +121,28 @@
         methods:{
             clicklist:function(key,detailStoryKey){
                 this.$root.$data.detailStoryKey = key;
+            },
+            drag:function(e){
+                e.dataTransfer.setData("text", e.target.dataset.key);
+                e.target.style.backgroundColor = "black";
+                e.target.style.color = "white";
+            },
+            dragend:function(e){
+                e.target.style.backgroundColor = "white";
+                e.target.style.color = "black";
+            },
+            dragover:function(e){
+                e.preventDefault();
+            },
+            drop:function(e){
+                e.preventDefault();
+                var key = e.dataTransfer.getData("text");
+                for(var i=0; i<e.path.length; i++){
+                    var droptype = e.path[i].dataset.droptype;
+                    if(typeof droptype !== 'undefined') break;
+                }
+                if(droptype === 'sprint'){ stories[key].status = 'toDo';}
+                else if(droptype === 'backlog'){ stories[key].status = 'backlog'; }
             }
         }
     })
@@ -132,7 +154,7 @@
             }
         },
         props:['detailStoryKey'],
-        template:'<div style="padding-top: 10px">\n' +
+        template:'<div style="padding-top: 10px" v-on:input="input">\n' +
         '                <span style=""><img src="images/storyicon.svg" style="vertical-align: text-bottom">{{stories[detailStoryKey].id}}</span>\n' +
         '                <div style="position:relative;margin-top:10px;font-size:18px;font-weight:bold;white-space: normal;padding: 5px;">{{stories[detailStoryKey].description}}' +
         '                   <textarea v-model="stories[detailStoryKey].description" style="width: 100%;height: 100%;position: absolute;top:0px;left:0px;white-space: normal;padding: 5px;border-color: #cc0000;border-radius: 5px;overflow: hidden;"></textarea>' +
@@ -142,7 +164,7 @@
         '\n' +
         '            </div>',
         methods:{
-            input:function(){
+            input:function(e){
 
             }
         }
@@ -166,21 +188,6 @@
 
     })
 
-    console.log(app);
-
-    function allowDrop(ev) {
-        ev.preventDefault();
-    }
-
-    function drag(ev) {
-        ev.dataTransfer.setData("text", ev.target.id);
-    }
-
-    function drop(ev) {
-        ev.preventDefault();
-        var data = ev.dataTransfer.getData("text");
-        ev.target.appendChild(document.getElementById(data));
-    }
 
 </script>
 

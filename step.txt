@@ -1,0 +1,2 @@
+1. clean style
+2. pass stories as prop

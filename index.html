@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Vue-Plan Board</title>
 
     <!-- Vue Framework -->
     <!-- production version, optimized for size and speed -->
@@ -29,20 +29,38 @@
 
         <div style="display: inline-block;width: 80%;float: left;overflow: auto;" v-bind:style="{height:leftContH}">
 
-            <story-list-container v-bind:stories="stories" title="TDC Sprint 35" status="toDo" v-bind:projects="projects" v-bind:projlast="projlast" v-bind:status-array="['toDo','inProgress','qa','done']" v-bind:detail-story-key="detailStoryKey" droptype="sprint" v-bind:display="display"></story-list-container>
+            <story-list-container v-bind:stories="stories"
+                                  title="TDC Sprint 35" status="toDo"
+                                  v-bind:projects="projects"
+                                  v-bind:projlast="projlast"
+                                  v-bind:status-array="['toDo','inProgress','qa','done']"
+                                  v-bind:detail-story-key="detailStoryKey"
+                                  droptype="sprint"
+                                  v-bind:display="display">
+            </story-list-container>
 
-            <story-list-container v-bind:stories="stories" title="Backlog" status="backlog" v-bind:projects="projects" v-bind:projlast="projlast" v-bind:status-array="['backlog']" v-bind:detail-story-key="detailStoryKey" droptype="backlog" v-bind:display="display"></story-list-container>
+            <story-list-container v-bind:stories="stories"
+                                  title="Backlog"
+                                  status="backlog"
+                                  v-bind:projects="projects"
+                                  v-bind:projlast="projlast"
+                                  v-bind:status-array="['backlog']"
+                                  v-bind:detail-story-key="detailStoryKey"
+                                  droptype="backlog"
+                                  v-bind:display="display">
+            </story-list-container>
 
 
-            <div v-if="display.storyPostContainer" style="position:relative;top: 0px;left: 0px;">
-                <h1>Story Post Container</h1>
+            <div v-if="display.storyPostContainer" style="position:relative;top: 0px;left: 0px; padding: 10px; height: 100%;">
+                <story-post-column v-bind:stories="stories" title="TO DO" status="toDo" droptype="toDo"></story-post-column>
+                <story-post-column v-bind:stories="stories" title="IN PROGRESS" status="inProgress"></story-post-column>
+                <story-post-column v-bind:stories="stories" title="IN QA" status="qa"></story-post-column>
+                <story-post-column v-bind:stories="stories" title="DONE" status="done"></story-post-column>
             </div>
-
-
 
         </div>
 
-        <div style="display: inline-block;width: 20%;float: right;">
+        <div style="display: inline-block;width: 20%;float: right;padding: 0px 5px;">
             <story-detail v-bind:stories="stories" v-bind:detail-story-key="detailStoryKey"></story-detail>
         </div>
 
@@ -50,10 +68,54 @@
 
 </div>
 
-<!-- Main App Vue Instance -->
-<!--<script src="js/app.js"></script>-->
-
 <script>
+
+    Vue.component('story-post-column',{
+        data: function(){
+            return {}
+        },
+        props:['stories','title','status','detailStoryKey','droptype'],
+        methods:{
+            clickPost:function(key,detailStoryKey){
+                this.$root.$data.detailStoryKey = key;
+            },
+            drag:function(e){
+                e.dataTransfer.setData("text", e.target.dataset.key);
+                e.target.style.backgroundColor = "black";
+                e.target.style.color = "white";
+                e.target.getElementsByTagName('th')[0].style.backgroundColor = "black";
+            },
+            dragend:function(e){
+                e.target.style.backgroundColor = "white";
+                e.target.style.color = "black";
+                e.target.getElementsByTagName('th')[0].style.backgroundColor = "#D1D3D6";
+            },
+            dragover:function(e){
+                e.preventDefault();
+            },
+            drop:function(e,stories){
+                e.preventDefault();
+                var key = e.dataTransfer.getData("text");
+                for(var i=0; i<e.path.length; i++){
+                    var status = e.path[i].dataset.status;
+                    if(typeof status !== 'undefined') break;
+                }
+                if(status === 'toDo'){ stories[key].status = 'toDo';}
+                else if(status === 'inProgress'){ stories[key].status = 'inProgress'; }
+                else if(status === 'qa'){ stories[key].status = 'qa'; }
+                else if(status === 'done'){ stories[key].status = 'done'; }
+            }
+        },
+        template:'<div v-on:drop="drop($event,stories)" v-on:dragover="dragover" :data-status="status" style="display: inline-block;width: 24%;padding: 5px;border-radius: 5px; border: 1px solid #D1D3D6;height: 100%;">\n' +
+        '                    <div class="alert alert-secondary" style="background-color: #F2F4F6; border: 0px;">{{title}}</div>\n' +
+        '                    <div v-for="story in stories" v-if="story.status === status" v-on:click="clickPost(story.key,detailStoryKey)" v-on:dragstart="drag" v-on:dragend="dragend" :data-key="story.key" draggable="true" style="margin-top: 10px;cursor: move;">\n' +
+        '                        <table style="border: 1px solid #D1D3D6;width: 100%;">\n' +
+        '                            <tr><th style="background-color: #DEDFE2;padding: 5px;"><img src="images/storyicon.svg" style="vertical-align: text-bottom">{{story.id}}</th></tr>\n' +
+        '                            <tr><td style="white-space: normal;padding: 5px;">{{story.description}}</td></tr>\n' +
+        '                        </table>\n' +
+        '                    </div>\n' +
+        '                </div>'
+    })
 
     Vue.component('nav-items',{
         data: function () {

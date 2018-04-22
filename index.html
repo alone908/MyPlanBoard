@@ -33,16 +33,8 @@
 
                 <storylist-title title="TDC Sprint 35"></storylist-title>
 
-                <div style="width: 60%;display: inline-block">
-                    <form class="form-inline">
-
-                        <input type="text" class="form-control mr-sm-2" style="padding: 3px 6px;width: 15%;" placeholder="Project">
-                        <input type="text" class="form-control mr-sm-2" style="padding: 3px 6px;width: 70%;" placeholder="Description">
-                        <button type="submit" class="btn btn-dark" style="padding: 3px 6px;">Add</button>
-
-                    </form>
-                </div>
-
+                <add-story-form status="toDo" v-bind:projects="projects" v-bind:projlast="projLast"></add-story-form>
+                
                 <story-list v-bind:status="['toDo','inProgress','qa','done']" v-bind:detail-story-key="detailStoryKey" droptype="sprint"></story-list>
             </div>
 
@@ -84,8 +76,10 @@
                 this.$data.navItems.forEach(function (i, k) { i.active = (e.target.id === i.id) ? true : false ; });
             }
         },
-        template: '<div class="navbar-nav" v-if="display.navItems"><a v-for="item in navItems" :id="item.id" class="nav-item nav-link" v-bind:class="{active: item.active}" v-bind:style="itemStyle" v-on:click="clickNavItem">{{item.item}}</a></div>'
-    })
+        template: '<div class="navbar-nav" v-if="display.navItems">' +
+            '<a v-for="item in navItems" :id="item.id" class="nav-item nav-link" v-bind:class="{active: item.active}" v-bind:style="itemStyle" v-on:click="clickNavItem">{{item.item}}</a>' +
+        '       </div>'
+    });
 
     Vue.component('navbar', {
         data: function () {
@@ -182,7 +176,37 @@
         }
     })
 
+    Vue.component('add-story-form',{
+        data:function(){
+            return {
+                errmsg:'',
+                proj:null,
+                descrip:null
+            }
+        },
+        props:['projects','projlast','status'],
+        template:'<div style="width: 70%;display: inline-block">\n' +
+        '                    <form class="form-inline" style="display:inline-flex;width:100%;">\n' +
+        '                        <input type="text" class="form-control mr-sm-2" name="proj" id="proj" v-model="proj" style="padding: 3px 6px;width: 15%;" placeholder="Project">\n' +
+        '                        <input type="text" class="form-control mr-sm-2" name="descrip" id="descrip" v-model="descrip" style="padding: 3px 6px;width: 60%;" placeholder="Description">\n' +
+        '                        <button type="button" class="btn btn-dark" v-on:click="addstory" style="padding: 3px 6px;">Add Story</button>\n' +
+        '                        <span style="display: inline-block;margin-left: 10px;color:#cc0000">{{errmsg}}</span>\n' +
+        '                    </form>\n' +
+        '                </div>',
+        methods:{
+            addstory:function(){
+                errmsg = '';
+                if(!this.proj || !this.descrip){
+                    console.log('err');
+                    this.$data.errmsg = 'all fields required.'
+                }else {
 
+                }
+
+
+            }
+        }
+    })
 
     var app = new Vue({
         el: '#app',
@@ -192,7 +216,17 @@
                 navItems:true,
             },
             stories:stories,
-            detailStoryKey:0
+            detailStoryKey:0,
+            projects:[
+                'PHIS',
+                'IEN',
+                'IQM'
+            ],
+            projLast:{
+                'PHIS':1325,
+                'IEN':1012,
+                'IQM':1186
+            }
         },
         methods:{
 

@@ -12,7 +12,7 @@ var stories = [
     {id:'IQM-456',key:10,status:'done',project:'IQM',description:'when adding/removing preexam and final remember exact page position and put back where it was originally. If a module is left empty after removing page, remove the module and insert it back as well'},
     {id:'IQM-756',key:11,status:'backlog',project:'IQM',description:'PhishProof - Ameritas - Total Count vs Current Count'},
     {id:'IQM-234',key:12,status:'backlog',project:'IQM',description:'If set target to a campaign that had it\'s target set to another campaign, email server will not be able to compose the targets.'},
-    {id:'PHIS-135',key:13,status:'backlog',project:'PHIS',description:'add superadmin UI to add page blocks (one page block is a single zip file with thumbnail, xml file and all needed images and media'},
+    {id:'PHIS-344',key:13,status:'backlog',project:'PHIS',description:'add superadmin UI to add page blocks (one page block is a single zip file with thumbnail, xml file and all needed images and media'},
     {id:'IQM-364',key:14,status:'backlog',project:'IQM',description:'convert all unique page types to be made with sequencer'},
     {id:'IEN-875',key:15,status:'backlog',project:'IEN',description:'phishhook activation email sent from test doesnt have userid'},
     {id:'PHIS-745',key:16,status:'backlog',project:'PHIS',description:'For quiz dialogs. The course editor can not distinguish the error messages in quizzes'},
@@ -24,7 +24,7 @@ var stories = [
     {id:'PHIS-856',key:22,status:'backlog',project:'PHIS',description:'In manage packages, Copyright block position will change after save template'},
     {id:'PHIS-687',key:23,status:'backlog',project:'PHIS',description:'In IE11 edit button background color setting is wrong'},
     {id:'IQM-486',key:24,status:'backlog',project:'IQM',description:'Go over all mysql queries and escape all non-number values'}
-]
+];
 
 /*
 

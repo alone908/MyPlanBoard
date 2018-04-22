@@ -23,14 +23,26 @@
 
 <div id="app">
 
-    <navbar v-bind:input-data="compoDisplay"></navbar>
+    <navbar v-bind:display="display"></navbar>
 
     <div style="width: 100%">
 
         <div style="display: inline-block;width: 80%;float: left;">
 
             <div style="position:relative;top: 0px;left: 0px;">
+
                 <storylist-title title="TDC Sprint 35"></storylist-title>
+
+                <div style="width: 60%;display: inline-block">
+                    <form class="form-inline">
+
+                        <input type="text" class="form-control mr-sm-2" style="padding: 3px 6px;width: 15%;" placeholder="Project">
+                        <input type="text" class="form-control mr-sm-2" style="padding: 3px 6px;width: 70%;" placeholder="Description">
+                        <button type="submit" class="btn btn-dark" style="padding: 3px 6px;">Add</button>
+
+                    </form>
+                </div>
+
                 <story-list v-bind:status="['toDo','inProgress','qa','done']" v-bind:detail-story-key="detailStoryKey" droptype="sprint"></story-list>
             </div>
 
@@ -66,13 +78,13 @@
                 itemStyle:{cursor:'pointer'}
             }
         },
-        props:['inputData'],
+        props:['display'],
         methods: {
             clickNavItem:function (e) {
                 this.$data.navItems.forEach(function (i, k) { i.active = (e.target.id === i.id) ? true : false ; });
             }
         },
-        template: '<div class="navbar-nav" v-if="inputData.navItems"><a v-for="item in navItems" :id="item.id" class="nav-item nav-link" v-bind:class="{active: item.active}" v-bind:style="itemStyle" v-on:click="clickNavItem">{{item.item}}</a></div>'
+        template: '<div class="navbar-nav" v-if="display.navItems"><a v-for="item in navItems" :id="item.id" class="nav-item nav-link" v-bind:class="{active: item.active}" v-bind:style="itemStyle" v-on:click="clickNavItem">{{item.item}}</a></div>'
     })
 
     Vue.component('navbar', {
@@ -81,12 +93,12 @@
                 brand:'Vue-PlanBoard',
             }
         },
-        props:['inputData'],
+        props:['display'],
         template: '' +
-       '<nav class="navbar navbar-expand-lg navbar-dark bg-dark" v-if="inputData.navbar">\n' +
+       '<nav class="navbar navbar-expand-lg navbar-dark bg-dark" v-if="display.navbar">\n' +
        '    <a class="navbar-brand" href="#">{{brand}}</a>\n' +
        '    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">\n' +
-       '        <nav-items v-bind:input-data="inputData"></nav-items>\n' +
+       '        <nav-items v-bind:display="display"></nav-items>\n' +
        '    </div>\n' +
        '</nav>'
     })
@@ -94,7 +106,7 @@
     Vue.component('storylist-title',{
         data: function(){ return {} },
         props:['title'],
-        template:'<div style="margin: 10px 20px;"><span>{{title}}</span></div>'
+        template:'<div style="margin: 10px 20px;display:inline-block;"><span>{{title}}</span></div>'
     })
 
     Vue.component('story-list',{
@@ -175,7 +187,7 @@
     var app = new Vue({
         el: '#app',
         data:{
-            compoDisplay:{
+            display:{
                 navbar:true,
                 navItems:true,
             },

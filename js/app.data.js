@@ -25,3 +25,11 @@ var stories = [
     {id:'PHIS-687',key:23,status:'backlog',project:'PHIS',description:'In IE11 edit button background color setting is wrong'},
     {id:'IQM-486',key:24,status:'backlog',project:'IQM',description:'Go over all mysql queries and escape all non-number values'}
 ]
+
+/*
+
+app
+ |
+ |-----
+
+ */

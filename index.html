@@ -6,28 +6,24 @@
 
     <!-- Vue Framework -->
     <!-- production version, optimized for size and speed -->
-    <!--<script src="https://cdn.jsdelivr.net/npm/vue"></script>-->
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
     <!-- development version, includes helpful console warnings -->
-    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-
-    <!-- jQuery -->
-    <!--<script src="jQuery-3.3.1/jquery-3.3.1.min.js"></script>-->
+    <!--<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>-->
 
     <!-- Bootstrap -->
-    <link href="bootstrap-4.1.0-dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
 
 </head>
+
 <body>
-
-
 
 <div id="app">
 
     <navbar v-bind:display="display"></navbar>
 
-    <div style="width: 100%">
+    <div id="app-content" v-bind:style="contentStyle">
 
-        <div style="display: inline-block;width: 80%;float: left;overflow: auto;" v-bind:style="{height:leftContH}">
+        <div id="left-content" v-bind:style="leftContentStyle">
 
             <story-list-container v-bind:stories="stories"
                                   title="TDC Sprint 35" status="toDo"
@@ -50,300 +46,27 @@
                                   v-bind:display="display">
             </story-list-container>
 
+            <story-post-container v-bind:stories="stories"
+                                  v-bind:display="display">
+            </story-post-container>
 
-            <div v-if="display.storyPostContainer" style="position:relative;top: 0px;left: 0px; padding: 10px; height: 100%;">
-                <story-post-column v-bind:stories="stories" title="TO DO" status="toDo" droptype="toDo"></story-post-column>
-                <story-post-column v-bind:stories="stories" title="IN PROGRESS" status="inProgress"></story-post-column>
-                <story-post-column v-bind:stories="stories" title="IN QA" status="qa"></story-post-column>
-                <story-post-column v-bind:stories="stories" title="DONE" status="done"></story-post-column>
-            </div>
 
         </div>
 
-        <div style="display: inline-block;width: 20%;float: right;padding: 0px 5px;">
-            <story-detail v-bind:stories="stories" v-bind:detail-story-key="detailStoryKey"></story-detail>
+        <div id="right-content" v-bind:style="rightContentStyle">
+
+            <story-detail
+                    v-bind:stories="stories"
+                    v-bind:detail-story-key="detailStoryKey">
+            </story-detail>
+
         </div>
 
     </div>
 
 </div>
 
-<script>
-
-    Vue.component('story-post-column',{
-        data: function(){
-            return {}
-        },
-        props:['stories','title','status','detailStoryKey','droptype'],
-        methods:{
-            clickPost:function(key,detailStoryKey){
-                this.$root.$data.detailStoryKey = key;
-            },
-            drag:function(e){
-                e.dataTransfer.setData("text", e.target.dataset.key);
-                e.target.style.backgroundColor = "black";
-                e.target.style.color = "white";
-                e.target.getElementsByTagName('th')[0].style.backgroundColor = "black";
-            },
-            dragend:function(e){
-                e.target.style.backgroundColor = "white";
-                e.target.style.color = "black";
-                e.target.getElementsByTagName('th')[0].style.backgroundColor = "#D1D3D6";
-            },
-            dragover:function(e){
-                e.preventDefault();
-            },
-            drop:function(e,stories){
-                e.preventDefault();
-                var key = e.dataTransfer.getData("text");
-                for(var i=0; i<e.path.length; i++){
-                    var status = e.path[i].dataset.status;
-                    if(typeof status !== 'undefined') break;
-                }
-                if(status === 'toDo'){ stories[key].status = 'toDo';}
-                else if(status === 'inProgress'){ stories[key].status = 'inProgress'; }
-                else if(status === 'qa'){ stories[key].status = 'qa'; }
-                else if(status === 'done'){ stories[key].status = 'done'; }
-            }
-        },
-        template:'<div v-on:drop="drop($event,stories)" v-on:dragover="dragover" :data-status="status" style="display: inline-block;width: 24%;padding: 5px;border-radius: 5px; border: 1px solid #D1D3D6;height: 100%;">\n' +
-        '                    <div class="alert alert-secondary" style="background-color: #F2F4F6; border: 0px;">{{title}}</div>\n' +
-        '                    <div v-for="story in stories" v-if="story.status === status" v-on:click="clickPost(story.key,detailStoryKey)" v-on:dragstart="drag" v-on:dragend="dragend" :data-key="story.key" draggable="true" style="margin-top: 10px;cursor: move;">\n' +
-        '                        <table style="border: 1px solid #D1D3D6;width: 100%;">\n' +
-        '                            <tr><th style="background-color: #DEDFE2;padding: 5px;"><img src="images/storyicon.svg" style="vertical-align: text-bottom">{{story.id}}</th></tr>\n' +
-        '                            <tr><td style="white-space: normal;padding: 5px;">{{story.description}}</td></tr>\n' +
-        '                        </table>\n' +
-        '                    </div>\n' +
-        '                </div>'
-    })
-
-    Vue.component('nav-items',{
-        data: function () {
-            return {
-                navItems:[
-                    {id:'navItem-1',item:'Backlog',active:true},
-                    {id:'navItem-2',item:'ActiveSprint',active:false}
-                ],
-                itemStyle:{cursor:'pointer'}
-            }
-        },
-        props:['display'],
-        methods: {
-            clickNavItem:function (e,display) {
-                if(e.target.classList.value.indexOf('active') === -1){
-                    if(e.target.textContent === 'ActiveSprint'){
-                        display.storyListContainer = false;
-                        display.storyPostContainer = true;
-                    }
-                    if(e.target.textContent === 'Backlog'){
-                        display.storyListContainer = true;
-                        display.storyPostContainer = false;
-                    }
-                }
-                this.$data.navItems.forEach(function (i, k) { i.active = (e.target.id === i.id) ? true : false ; });
-            }
-        },
-        template: '<div class="navbar-nav" v-if="display.navItems">' +
-            '<a v-for="item in navItems" :id="item.id" class="nav-item nav-link" v-bind:class="{active: item.active}" v-bind:style="itemStyle" v-on:click="clickNavItem($event,display)">{{item.item}}</a>' +
-        '       </div>'
-    });
-
-    Vue.component('navbar', {
-        data: function () {
-            return {
-                brand:'Vue-PlanBoard',
-            }
-        },
-        props:['display'],
-        template: '' +
-       '<nav class="navbar navbar-expand-lg navbar-dark bg-dark" v-if="display.navbar">\n' +
-       '    <a class="navbar-brand" href="#">{{brand}}</a>\n' +
-       '    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">\n' +
-       '        <nav-items v-bind:display="display"></nav-items>\n' +
-       '    </div>\n' +
-       '</nav>'
-    })
-
-    Vue.component('storylist-title',{
-        data: function(){ return {} },
-        props:['title'],
-        template:'<div style="margin: 10px 20px;display:inline-block;"><span>{{title}}</span></div>'
-    })
-
-    Vue.component('story-list',{
-        data: function () {
-            return {}
-        },
-        props:['stories','status','detailStoryKey','droptype'],
-        template:'<div style="margin: 10px 20px;padding-bottom: 20px;" v-on:drop="drop($event,stories)" v-on:dragover="dragover" :data-droptype="droptype">' +
-        '                    <div :id="story.id" v-for="story in stories" v-if="status.indexOf(story.status) !== -1" v-on:click="clicklist(story.key,detailStoryKey)" v-on:dragstart="drag" v-on:dragend="dragend" :data-key="story.key" draggable="true" style="height:32px;border: 1px solid #DBDDE2;margin-top:-1px;font-size:14px;cursor:move;position: relative;">\n' +
-        '                        <div style="padding-left: 5px;box-sizing: border-box;overflow: hidden;position: relative;white-space: nowrap">\n' +
-        '                            <div style="height:22px; margin:5px 0px;line-height: 22px;">\n' +
-        '                                <span style="display: inline-block;margin-left: 16px;"><img src="images/storyicon.svg" style="vertical-align: text-bottom"></span>\n' +
-        '                                <span style="display: inline-block;margin-left: 16px;">{{story.description}}</span>\n' +
-        '                            </div>\n' +
-        '                        </div>\n' +
-        '                        <div style="position: absolute;right: 0px;top: 5px;height: 22px;padding:  0px 5px 0px 20px;">\n' +
-        '                            <span>{{story.id}}</span>\n' +
-        '                        </div>\n' +
-        '                        <div style="background-color: #cc0000;width: 2px;left: 2px;top: 2px;bottom: 2px;height:auto;position: absolute;text-indent: -9999em"></div>\n' +
-        '                    </div>' +
-        '</div>',
-        methods:{
-            clicklist:function(key,detailStoryKey){
-                this.$root.$data.detailStoryKey = key;
-            },
-            drag:function(e){
-                e.dataTransfer.setData("text", e.target.dataset.key);
-                e.target.style.backgroundColor = "black";
-                e.target.style.color = "white";
-            },
-            dragend:function(e){
-                e.target.style.backgroundColor = "white";
-                e.target.style.color = "black";
-            },
-            dragover:function(e){
-                e.preventDefault();
-            },
-            drop:function(e,stories){
-                e.preventDefault();
-                var key = e.dataTransfer.getData("text");
-                for(var i=0; i<e.path.length; i++){
-                    var droptype = e.path[i].dataset.droptype;
-                    if(typeof droptype !== 'undefined') break;
-                }
-                if(droptype === 'sprint'){ stories[key].status = 'toDo';}
-                else if(droptype === 'backlog'){ stories[key].status = 'backlog'; }
-            }
-        }
-    })
-
-    Vue.component('story-detail',{
-        data: function (){
-            return {}
-        },
-        props:['stories','detailStoryKey'],
-        template:'<div style="padding-top: 10px" v-on:input="input">\n' +
-        '                <span style=""><img src="images/storyicon.svg" style="vertical-align: text-bottom">{{stories[detailStoryKey].id}}</span>\n' +
-        '                <div style="position:relative;margin-top:10px;font-size:18px;font-weight:bold;white-space: normal;padding: 5px;">{{stories[detailStoryKey].description}}' +
-        '                   <textarea v-model="stories[detailStoryKey].description" style="width: 100%;height: 100%;position: absolute;top:0px;left:0px;white-space: normal;padding: 5px;border-color: #cc0000;border-radius: 5px;overflow: hidden;"></textarea>' +
-        '                </div>\n' +
-        '                <div style="margin-top:10px;font-size:14px;font-weight:bold;white-space: normal;">Project:&nbsp;{{stories[detailStoryKey].project}}</div>\n' +
-        '                <div style="margin-top:10px;font-size:14px;font-weight:bold;white-space: normal;">Status:&nbsp;{{stories[detailStoryKey].status}}</div>\n' +
-        '\n' +
-        '            </div>',
-        methods:{
-            input:function(e){
-
-            }
-        }
-    })
-
-    Vue.component('add-story-form',{
-        data:function(){
-            return {
-                errmsg:'',
-                proj:null,
-                descrip:null
-            }
-        },
-        props:['stories','projects','projlast','status'],
-        template:'<div style="width: 70%;display: inline-block">\n' +
-        '                    <form class="form-inline" style="display:inline-flex;width:100%;">\n' +
-        '                        <input type="text" class="form-control mr-sm-2" name="proj" id="proj" v-model="proj" style="padding: 3px 6px;width: 15%;" placeholder="Project">\n' +
-        '                        <input type="text" class="form-control mr-sm-2" name="descrip" id="descrip" v-model="descrip" style="padding: 3px 6px;width: 60%;" placeholder="Description">\n' +
-        '                        <button type="button" class="btn btn-dark" v-on:click="addstory(stories,projects,projlast,status)" style="padding: 3px 6px;">Add Story</button>\n' +
-        '                        <span style="display: inline-block;margin-left: 10px;color:#cc0000">{{errmsg}}</span>\n' +
-        '                    </form>\n' +
-        '                </div>',
-        methods:{
-            addstory:function(stories,projects,projlast,status){
-                errmsg = '';
-                if(!this.proj || !this.descrip){
-                    this.$data.errmsg = 'all fields required.'
-                }else {
-                    if(projects.indexOf(this.proj) === -1){
-                        projects.push(this.proj);
-                        projlast[this.proj] = 1;
-                        stories.push({id:this.proj+'-1',key:stories.length,status:status,project:this.proj,description:this.descrip});
-                    }else if(projects.indexOf(this.proj) !== -1){
-                        projlast[this.proj] ++;
-                        stories.push({id:this.proj+'-'+projlast[this.proj].toString(),key:stories.length,status:status,project:this.proj,description:this.descrip});
-                    }
-                }
-            }
-        }
-    })
-
-    Vue.component('story-list-container',{
-        data:function(){
-            return {}
-        },
-        props:['stories','title','status','projects','projlast','statusArray','detailStoryKey','droptype','display'],
-        template:'<div v-if="display.storyListContainer" style="position:relative;top: 0px;left: 0px;">\n' +
-        '                <storylist-title v-bind:title="title"></storylist-title>\n' +
-        '                <add-story-form v-bind:stories="stories" v-bind:status="status" v-bind:projects="projects" v-bind:projlast="projlast"></add-story-form>\n' +
-        '                <story-list v-bind:stories="stories" v-bind:status="statusArray" v-bind:detail-story-key="detailStoryKey" v-bind:droptype="droptype"></story-list>\n' +
-        '            </div>'
-    })
-
-    var app = new Vue({
-        el: '#app',
-        data:{
-            display:{
-                navbar:true,
-                navItems:true,
-                storyListContainer:true,
-                storyPostContainer:false
-            },
-            leftContH:(window.innerHeight-56).toString()+'px',
-            stories:[
-                {id:'PHIS-100',key:0,status:'toDo',project:'PHIS',description:'Construct schedule part for the wizard'},
-                {id:'IQM-262',key:1,status:'toDo',project:'IQM',description:'Construct cronjob for sending emails'},
-                {id:'IEN-132',key:2,status:'toDo',project:'IEN',description:'Update policy acceptance with correct document.'},
-                {id:'PHIS-135',key:3,status:'toDo',project:'PHIS',description:'add a page where admins can create new USB campaign. It will be a single page with campaign name, location, the education page that will be displayed when macro is run (similar to randomizer only select from list).'},
-                {id:'IEN-634',key:4,status:'toDo',project:'IEN',description:'QA Randomizer Wizard'},
-                {id:'IEN-545',key:5,status:'inProgress',project:'IEN',description:'make the completed campaign report work with randomizer data structure.'},
-                {id:'IQM-865',key:6,status:'inProgress',project:'IQM',description:'As an admin, I must have the ability to schedule multiple campaigns (with unique templates) within the same batch timeframe. '},
-                {id:'IEN-264',key:7,status:'inProgress',project:'IEN',description:'Need a feature to "publish to lms".'},
-                {id:'IEN-457',key:8,status:'qa',project:'IEN',description:'simulation page can\'t not be editable'},
-                {id:'PHIS-526',key:9,status:'qa',project:'PHIS',description:'Global reporting/By individual for randomized campaigns'},
-                {id:'IQM-456',key:10,status:'done',project:'IQM',description:'when adding/removing preexam and final remember exact page position and put back where it was originally. If a module is left empty after removing page, remove the module and insert it back as well'},
-                {id:'IQM-756',key:11,status:'backlog',project:'IQM',description:'PhishProof - Ameritas - Total Count vs Current Count'},
-                {id:'IQM-234',key:12,status:'backlog',project:'IQM',description:'If set target to a campaign that had it\'s target set to another campaign, email server will not be able to compose the targets.'},
-                {id:'PHIS-344',key:13,status:'backlog',project:'PHIS',description:'add superadmin UI to add page blocks (one page block is a single zip file with thumbnail, xml file and all needed images and media'},
-                {id:'IQM-364',key:14,status:'backlog',project:'IQM',description:'convert all unique page types to be made with sequencer'},
-                {id:'IEN-875',key:15,status:'backlog',project:'IEN',description:'phishhook activation email sent from test doesnt have userid'},
-                {id:'PHIS-745',key:16,status:'backlog',project:'PHIS',description:'For quiz dialogs. The course editor can not distinguish the error messages in quizzes'},
-                {id:'PHIS-867',key:17,status:'backlog',project:'PHIS',description:'support adding (uploading) inline images and external link images to education emails sent.\n'},
-                {id:'PHIS-987',key:18,status:'backlog',project:'PHIS',description:'As an Admin, I need to easily be able to select groups and/or hierarchy in the trend analysis report.'},
-                {id:'IQM-253',key:19,status:'backlog',project:'IQM',description:'Add course progress bar to the control panel for mobile skin.'},
-                {id:'IQM-374',key:20,status:'backlog',project:'IQM',description:'feature requested, change collection end date for completed campaign'},
-                {id:'IEN-475',key:21,status:'backlog',project:'IEN',description:'Image edite thumbnail issue'},
-                {id:'PHIS-856',key:22,status:'backlog',project:'PHIS',description:'In manage packages, Copyright block position will change after save template'},
-                {id:'PHIS-687',key:23,status:'backlog',project:'PHIS',description:'In IE11 edit button background color setting is wrong'},
-                {id:'IQM-486',key:24,status:'backlog',project:'IQM',description:'Go over all mysql queries and escape all non-number values'}
-            ],
-            detailStoryKey:0,
-            projects:[
-                'PHIS',
-                'IEN',
-                'IQM'
-            ],
-            projlast:{
-                'PHIS':1325,
-                'IEN':1012,
-                'IQM':1186
-            }
-        },
-        methods:{
-
-        }
-
-    })
-
-
-</script>
+<script src="js/app.js"></script>
 
 </body>
 </html>

@@ -13,17 +13,19 @@ app
         |
         |---[left-content]
         |      |
-        |      |---[story-list-container]
+        |      |---[backlog-tab]
         |      |      |
-        |      |      |---[storylist-title]
-        |      |      |---[add-story-form]
-        |      |      |---[story-list]
-        |      |
-        |      |---[story-list-container]
+        |      |      |---[story-list-container]
+        |      |      |      |
+        |      |      |      |---[storylist-title]
+        |      |      |      |---[add-story-form]
+        |      |      |      |---[story-list]
         |      |      |
-        |      |      |---[storylist-title]
-        |      |      |---[add-story-form]
-        |      |      |---[story-list]
+        |      |      |---[story-list-container]
+        |      |             |
+        |      |             |---[storylist-title]
+        |      |             |---[add-story-form]
+        |      |             |---[story-list]
         |      |
         |      |---[story-post-container]
         |             |
@@ -44,7 +46,7 @@ Vue.component('story-post-container',{
         }
     },
     props:['stories','display'],
-    template:'<div v-if="display.storyPostContainer" v-bind:style="styleObj">\n' +
+    template:'<div v-bind:style="styleObj">\n' +
     '                <story-post-column v-bind:stories="stories" title="TO DO" status="toDo"></story-post-column>\n' +
     '                <story-post-column v-bind:stories="stories" title="IN PROGRESS" status="inProgress"></story-post-column>\n' +
     '                <story-post-column v-bind:stories="stories" title="IN QA" status="qa"></story-post-column>\n' +
@@ -124,24 +126,22 @@ Vue.component('nav-items',{
             itemStyle:{cursor:'pointer'}
         }
     },
-    props:['display'],
+    props:[''],
     methods: {
-        clickNavItem:function (e,display) {
+        clickNavItem:function (e) {
             if(e.target.classList.value.indexOf('active') === -1){
                 if(e.target.textContent === 'ActiveSprint'){
-                    display.storyListContainer = false;
-                    display.storyPostContainer = true;
+                    this.$root.$data.currentView = 'story-post-container'
                 }
                 if(e.target.textContent === 'Backlog'){
-                    display.storyListContainer = true;
-                    display.storyPostContainer = false;
+                    this.$root.$data.currentView = 'backlog-tab'
                 }
             }
             this.$data.navItems.forEach(function (i, k) { i.active = (e.target.id === i.id) ? true : false ; });
         }
     },
-    template: '<div class="navbar-nav" v-if="display.navItems">' +
-    '<a v-for="item in navItems" :id="item.id" class="nav-item nav-link" v-bind:class="{active: item.active}" v-bind:style="itemStyle" v-on:click="clickNavItem($event,display)">{{item.item}}</a>' +
+    template: '<div class="navbar-nav">' +
+    '<a v-for="item in navItems" :id="item.id" class="nav-item nav-link" v-bind:class="{active: item.active}" v-bind:style="itemStyle" v-on:click="clickNavItem">{{item.item}}</a>' +
     '       </div>'
 });
 
@@ -151,12 +151,12 @@ Vue.component('navbar', {
             brand:'Vue-PlanBoard',
         }
     },
-    props:['display'],
+    props:[''],
     template: '' +
-    '<nav class="navbar navbar-expand-lg navbar-dark bg-dark" v-if="display.navbar">\n' +
+    '<nav class="navbar navbar-expand-lg navbar-dark bg-dark">\n' +
     '    <a class="navbar-brand" href="#">{{brand}}</a>\n' +
     '    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">\n' +
-    '        <nav-items v-bind:display="display"></nav-items>\n' +
+    '        <nav-items></nav-items>\n' +
     '    </div>\n' +
     '</nav>'
 })
@@ -192,7 +192,7 @@ Vue.component('story-list',{
             iconStyle: {display: 'inline-block', marginLeft: '16px'},
             imageStyle: {verticalAalign: 'text-bottom'},
             descripStyle: {display: 'inline-block', marginLeft: '16px'},
-            idStyle: {position: 'absolute', right: '0px', top: '5px', height: '22px', padding: '0px 5px 0px 20px'},
+            idStyle: {position: 'absolute', right: '0px', top: '5px', height: '22px', padding: '0px 5px 0px 20px', backgroundColor:'white'},
             sidebarStyle: {
                 backgroundColor: '#cc0000',
                 width: '2px',
@@ -214,7 +214,7 @@ Vue.component('story-list',{
     '                                <span v-bind:style="descripStyle">{{story.description}}</span>\n' +
     '                            </div>\n' +
     '                        </div>\n' +
-    '                        <div v-bind:style="idStyle">\n' +
+    '                        <div class="storyid" v-bind:style="idStyle">\n' +
     '                            <span>{{story.id}}</span>\n' +
     '                        </div>\n' +
     '                        <div v-bind:style="sidebarStyle"></div>\n' +
@@ -228,10 +228,12 @@ Vue.component('story-list',{
             e.dataTransfer.setData("text", e.target.dataset.key);
             e.target.style.backgroundColor = "black";
             e.target.style.color = "white";
+            e.target.getElementsByClassName('storyid')[0].style.backgroundColor = 'black';
         },
         dragend:function(e){
             e.target.style.backgroundColor = "white";
             e.target.style.color = "black";
+            e.target.getElementsByClassName('storyid')[0].style.backgroundColor = 'white';
         },
         dragover:function(e){
             e.preventDefault();
@@ -339,24 +341,49 @@ Vue.component('story-list-container',{
             listStyle: {position: 'relative', top: '0px', left: '0px'}
         }
     },
-    props:['stories','title','status','projects','projlast','statusArray','detailStoryKey','droptype','display'],
-    template:'<div v-if="display.storyListContainer" v-bind:style="listStyle">\n' +
+    props:['stories','title','status','projects','projlast','statusArray','detailStoryKey','droptype'],
+    template:'<div v-bind:style="listStyle">\n' +
     '                <storylist-title v-bind:title="title"></storylist-title>\n' +
     '                <add-story-form v-bind:stories="stories" v-bind:status="status" v-bind:projects="projects" v-bind:projlast="projlast"></add-story-form>\n' +
     '                <story-list v-bind:stories="stories" v-bind:status="statusArray" v-bind:detail-story-key="detailStoryKey" v-bind:droptype="droptype"></story-list>\n' +
     '            </div>'
 })
 
+Vue.component('backlog-tab',{
+    data:function(){
+        return {
+            backlogtab:[
+                    {title:"TDC Sprint 35",status:"toDo",statusArray:['toDo','inProgress','qa','done'],droptype:"sprint"},
+                    {title:"Backlog",status:"backlog",statusArray:['backlog'],droptype:"backlog"}
+                ]
+        }
+    },
+    props:['stories','projects','projlast','detailStoryKey'],
+    template:'<div>' +
+    '            <story-list-container v-for="list in backlogtab" v-bind:stories="stories"\n' +
+    '                                  v-bind:title="list.title" v-bind:status="list.status"\n' +
+    '                                  v-bind:projects="projects"\n' +
+    '                                  v-bind:projlast="projlast"\n' +
+    '                                  v-bind:status-array="list.statusArray"\n' +
+    '                                  v-bind:detail-story-key="detailStoryKey"\n' +
+    '                                  v-bind:droptype="list.droptype">\n' +
+    '            </story-list-container>' +
+    '</div>'
+})
+
 var app = new Vue({
     el: '#app',
     data:{
-        display:{
-            navbar:true,
-            navItems:true,
-            storyListContainer:true,
-            storyPostContainer:false
-        },
         leftContH:(window.innerHeight-56).toString()+'px',
+        currentView:'backlog-tab',
+        components: {
+            'backlog-tab': {
+                template: '<backlog-tab v-bind:stories="stories" v-bind:projects="projects" v-bind:projlast="projlast" v-bind:detail-story-key="detailStoryKey"></backlog-tab>'
+            },
+            'story-post-container': {
+                template: '<story-post-container v-bind:stories="stories"></story-post-container>'
+            }
+        },
         stories:[
             {id:'PHIS-100',key:0,status:'toDo',project:'PHIS',description:'Construct schedule part for the wizard'},
             {id:'IQM-262',key:1,status:'toDo',project:'IQM',description:'Construct cronjob for sending emails'},

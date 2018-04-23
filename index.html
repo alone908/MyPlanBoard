@@ -29,17 +29,19 @@ app
         |
         |---[left-content]
         |      |
-        |      |---[story-list-container]
+        |      |---[backlog-tab]
         |      |      |
-        |      |      |---[storylist-title]
-        |      |      |---[add-story-form]
-        |      |      |---[story-list]
-        |      |
-        |      |---[story-list-container]
+        |      |      |---[story-list-container]
+        |      |      |      |
+        |      |      |      |---[storylist-title]
+        |      |      |      |---[add-story-form]
+        |      |      |      |---[story-list]
         |      |      |
-        |      |      |---[storylist-title]
-        |      |      |---[add-story-form]
-        |      |      |---[story-list]
+        |      |      |---[story-list-container]
+        |      |             |
+        |      |             |---[storylist-title]
+        |      |             |---[add-story-form]
+        |      |             |---[story-list]
         |      |
         |      |---[story-post-container]
         |             |
@@ -53,39 +55,32 @@ app
                |---[story-detail]
 -->
 
+<style>
+    .component-fade-enter-active, .component-fade-leave-active {
+        transition: opacity .3s ease;
+    }
+    .component-fade-enter, .component-fade-leave-to
+        /* .component-fade-leave-active below version 2.1.8 */ {
+        opacity: 0;
+    }
+</style>
+
 <div id="app">
 
-    <navbar v-bind:display="display"></navbar>
+    <navbar></navbar>
 
     <div id="app-content" v-bind:style="contentStyle">
 
         <div id="left-content" v-bind:style="leftContentStyle">
 
-            <story-list-container v-bind:stories="stories"
-                                  title="TDC Sprint 35" status="toDo"
-                                  v-bind:projects="projects"
-                                  v-bind:projlast="projlast"
-                                  v-bind:status-array="['toDo','inProgress','qa','done']"
-                                  v-bind:detail-story-key="detailStoryKey"
-                                  droptype="sprint"
-                                  v-bind:display="display">
-            </story-list-container>
-
-            <story-list-container v-bind:stories="stories"
-                                  title="Backlog"
-                                  status="backlog"
-                                  v-bind:projects="projects"
-                                  v-bind:projlast="projlast"
-                                  v-bind:status-array="['backlog']"
-                                  v-bind:detail-story-key="detailStoryKey"
-                                  droptype="backlog"
-                                  v-bind:display="display">
-            </story-list-container>
-
-            <story-post-container v-bind:stories="stories"
-                                  v-bind:display="display">
-            </story-post-container>
-
+            <transition name="component-fade" mode="out-in">
+                <component v-bind:is="currentView"
+                           v-bind:stories="stories"
+                           v-bind:projects="projects"
+                           v-bind:projlast="projlast"
+                           v-bind:detail-story-key="detailStoryKey">
+                </component>
+            </transition>
 
         </div>
 

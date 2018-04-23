@@ -1,3 +1,36 @@
+/*
+app
+ |---[navbar]
+ |      |
+ |      |---[nav-items]
+ |
+ |---[app-content]
+        |
+        |---[left-content]
+        |      |
+        |      |---[story-list-container]
+        |      |      |
+        |      |      |---[storylist-title]
+        |      |      |---[add-story-form]
+        |      |      |---[story-list]
+        |      |
+        |      |---[story-list-container]
+        |      |      |
+        |      |      |---[storylist-title]
+        |      |      |---[add-story-form]
+        |      |      |---[story-list]
+        |      |
+        |      |---[story-post-container]
+        |             |
+        |             |---[story-post-column]
+        |             |---[story-post-column]
+        |             |---[story-post-column]
+        |             |---[story-post-column]
+        |
+        |---[right-content]
+               |
+               |---[story-detail]
+*/
 
 Vue.component('story-post-container',{
     data: function(){

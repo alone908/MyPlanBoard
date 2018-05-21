@@ -205,9 +205,10 @@ Vue.component('story-list',{
             }
         }
     },
-    props:['stories','status','detailStoryKey','droptype'],
-    template:'<div v-bind:style="listStyle" v-on:drop="drop($event,stories)" v-on:dragover="dragover" :data-droptype="droptype">' +
-    '                    <div :id="story.id" v-for="story in stories" v-if="status.indexOf(story.status) !== -1" v-on:click="clicklist(story.key,detailStoryKey)" v-on:dragstart="drag" v-on:dragend="dragend" :data-key="story.key" draggable="true" v-bind:style="itemStyle">\n' +
+    props:['stories','storiesInSprint','storiesInBacklog','title','status','detailStoryKey','droptype'],
+    template:'<draggable v-if="status === \'toDo\'" v-model="storiesInSprint" :options="{group:\'story\'}" v-bind:style="listStyle">' +
+    // '<div v-bind:style="listStyle" v-on:drop="drop($event,stories)" v-on:dragover="dragover" :data-droptype="droptype">' +
+    '                    <div v-for="story in storiesInSprint" :key="story.key" v-bind:style="itemStyle" v-on:click="clicklist(story.key,detailStoryKey)">\n' +
     '                        <div v-bind:style="contStyle">\n' +
     '                            <div v-bind:style="storyStyle">\n' +
     '                                <span v-bind:style="iconStyle"><img src="images/storyicon.svg" v-bind:style="imageStyle"></span>\n' +
@@ -219,7 +220,34 @@ Vue.component('story-list',{
     '                        </div>\n' +
     '                        <div v-bind:style="sidebarStyle"></div>\n' +
     '                    </div>' +
-    '</div>',
+    // '</div>' +
+    '</draggable>' +
+    '<draggable v-else-if="status === \'backlog\'" v-model="storiesInBacklog" :options="{group:\'story\'}" v-bind:style="listStyle">' +
+    // '<div v-bind:style="listStyle" v-on:drop="drop($event,stories)" v-on:dragover="dragover" :data-droptype="droptype">' +
+    '                    <div v-for="story in storiesInBacklog" :key="story.key" v-bind:style="itemStyle" v-on:click="clicklist(story.key,detailStoryKey)">\n' +
+    '                        <div v-bind:style="contStyle">\n' +
+    '                            <div v-bind:style="storyStyle">\n' +
+    '                                <span v-bind:style="iconStyle"><img src="images/storyicon.svg" v-bind:style="imageStyle"></span>\n' +
+    '                                <span v-bind:style="descripStyle">{{story.description}}</span>\n' +
+    '                            </div>\n' +
+    '                        </div>\n' +
+    '                        <div class="storyid" v-bind:style="idStyle">\n' +
+    '                            <span>{{story.id}}</span>\n' +
+    '                        </div>\n' +
+    '                        <div v-bind:style="sidebarStyle"></div>\n' +
+    '                    </div>' +
+    // '</div>' +
+    '</draggable>',
+    computed:{
+        filterlist:function(){
+            var status = this.status
+            var list = [];
+            this.stories.map(function(story){
+                if(status.indexOf(story.status) !== -1) list.push(story);
+            })
+            return list;
+        }
+    },
     methods:{
         clicklist:function(key,detailStoryKey){
             this.$root.$data.detailStoryKey = key;
@@ -341,11 +369,11 @@ Vue.component('story-list-container',{
             listStyle: {position: 'relative', top: '0px', left: '0px'}
         }
     },
-    props:['stories','title','status','projects','projlast','statusArray','detailStoryKey','droptype'],
+    props:['stories','storiesInSprint','storiesInBacklog','title','status','projects','projlast','statusArray','detailStoryKey','droptype'],
     template:'<div v-bind:style="listStyle">\n' +
     '                <storylist-title v-bind:title="title"></storylist-title>\n' +
     '                <add-story-form v-bind:stories="stories" v-bind:status="status" v-bind:projects="projects" v-bind:projlast="projlast"></add-story-form>\n' +
-    '                <story-list v-bind:stories="stories" v-bind:status="statusArray" v-bind:detail-story-key="detailStoryKey" v-bind:droptype="droptype"></story-list>\n' +
+    '                <story-list v-bind:stories="stories" v-bind:stories-in-sprint="storiesInSprint" v-bind:stories-in-backlog="storiesInBacklog" v-bind:title="title" v-bind:status="status" v-bind:detail-story-key="detailStoryKey" v-bind:droptype="droptype"></story-list>\n' +
     '            </div>'
 })
 
@@ -358,9 +386,9 @@ Vue.component('backlog-tab',{
                 ]
         }
     },
-    props:['stories','projects','projlast','detailStoryKey'],
+    props:['stories','storiesInSprint','storiesInBacklog','projects','projlast','detailStoryKey'],
     template:'<div>' +
-    '            <story-list-container v-for="list in backlogtab" v-bind:stories="stories"\n' +
+    '            <story-list-container v-for="list in backlogtab" v-bind:stories="stories" v-bind:stories-in-sprint="storiesInSprint" v-bind:stories-in-backlog="storiesInBacklog"\n' +
     '                                  v-bind:title="list.title" v-bind:status="list.status"\n' +
     '                                  v-bind:projects="projects"\n' +
     '                                  v-bind:projlast="projlast"\n' +
@@ -378,7 +406,7 @@ var app = new Vue({
         currentView:'backlog-tab',
         components: {
             'backlog-tab': {
-                template: '<backlog-tab v-bind:stories="stories" v-bind:projects="projects" v-bind:projlast="projlast" v-bind:detail-story-key="detailStoryKey"></backlog-tab>'
+                template: '<backlog-tab v-bind:stories="stories" v-bind:stories-in-sprint="storiesInSprint" v-bind:stories-in-backlog="storiesInBacklog" v-bind:projects="projects" v-bind:projlast="projlast" v-bind:detail-story-key="detailStoryKey"></backlog-tab>'
             },
             'story-post-container': {
                 template: '<story-post-container v-bind:stories="stories"></story-post-container>'
@@ -432,8 +460,25 @@ var app = new Vue({
         },
         rightContentStyle: {display: 'inline-block', width: '20%', float: 'right', padding: '0px 5px'}
     },
+    computed: {
+        storiesInSprint: function () {
+            var status = ['toDo','inProgress','qa','done'];
+            var list = [];
+            this.stories.map(function(story){
+                if(status.indexOf(story.status) !== -1) list.push(story);
+            })
+            return list;
+        },
+        storiesInBacklog: function () {
+            var status = ['backlog'];
+            var list = [];
+            this.stories.map(function(story){
+                if(status.indexOf(story.status) !== -1) list.push(story);
+            })
+            return list;
+        }
+    },
     methods:{
 
     }
-
 })

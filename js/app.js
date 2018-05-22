@@ -192,7 +192,7 @@ Vue.component('story-list',{
             iconStyle: {display: 'inline-block', marginLeft: '16px'},
             imageStyle: {verticalAalign: 'text-bottom'},
             descripStyle: {display: 'inline-block', marginLeft: '16px'},
-            idStyle: {position: 'absolute', right: '0px', top: '5px', height: '22px', padding: '0px 5px 0px 20px', backgroundColor:'white'},
+            idStyle: {position: 'absolute', right: '0px', top: '5px', height: '22px', padding: '0px 5px 0px 20px'},
             sidebarStyle: {
                 backgroundColor: '#cc0000',
                 width: '2px',
@@ -206,9 +206,8 @@ Vue.component('story-list',{
         }
     },
     props:['stories','storiesInSprint','storiesInBacklog','title','status','detailStoryKey','droptype'],
-    template:'<draggable v-if="status === \'toDo\'" v-model="storiesInSprint" :options="{group:\'story\'}" v-bind:style="listStyle">' +
-    // '<div v-bind:style="listStyle" v-on:drop="drop($event,stories)" v-on:dragover="dragover" :data-droptype="droptype">' +
-    '                    <div v-for="story in storiesInSprint" :key="story.key" v-bind:style="itemStyle" v-on:click="clicklist(story.key,detailStoryKey)">\n' +
+    template:'<draggable v-if="status === \'inSprint\'" :list="storiesInSprint" :options="{group:\'story\'}" @end="onEnd($event,storiesInSprint,storiesInBacklog)" v-bind:style="listStyle">' +
+    '                    <div v-for="story in storiesInSprint" :key="story.key" :status="status" v-bind:style="itemStyle" v-on:click="clicklist(story.key,detailStoryKey)">\n' +
     '                        <div v-bind:style="contStyle">\n' +
     '                            <div v-bind:style="storyStyle">\n' +
     '                                <span v-bind:style="iconStyle"><img src="images/storyicon.svg" v-bind:style="imageStyle"></span>\n' +
@@ -220,11 +219,9 @@ Vue.component('story-list',{
     '                        </div>\n' +
     '                        <div v-bind:style="sidebarStyle"></div>\n' +
     '                    </div>' +
-    // '</div>' +
     '</draggable>' +
-    '<draggable v-else-if="status === \'backlog\'" v-model="storiesInBacklog" :options="{group:\'story\'}" v-bind:style="listStyle">' +
-    // '<div v-bind:style="listStyle" v-on:drop="drop($event,stories)" v-on:dragover="dragover" :data-droptype="droptype">' +
-    '                    <div v-for="story in storiesInBacklog" :key="story.key" v-bind:style="itemStyle" v-on:click="clicklist(story.key,detailStoryKey)">\n' +
+    '<draggable v-else-if="status === \'backlog\'" :list="storiesInBacklog" :options="{group:\'story\'}" @end="onEnd($event,storiesInSprint,storiesInBacklog)" v-bind:style="listStyle">' +
+    '                    <div v-for="story in storiesInBacklog" :key="story.key" :status="status" v-bind:style="itemStyle" v-on:click="clicklist(story.key,detailStoryKey)">\n' +
     '                        <div v-bind:style="contStyle">\n' +
     '                            <div v-bind:style="storyStyle">\n' +
     '                                <span v-bind:style="iconStyle"><img src="images/storyicon.svg" v-bind:style="imageStyle"></span>\n' +
@@ -236,45 +233,28 @@ Vue.component('story-list',{
     '                        </div>\n' +
     '                        <div v-bind:style="sidebarStyle"></div>\n' +
     '                    </div>' +
-    // '</div>' +
     '</draggable>',
-    computed:{
-        filterlist:function(){
-            var status = this.status
-            var list = [];
-            this.stories.map(function(story){
-                if(status.indexOf(story.status) !== -1) list.push(story);
-            })
-            return list;
-        }
-    },
     methods:{
         clicklist:function(key,detailStoryKey){
             this.$root.$data.detailStoryKey = key;
         },
-        drag:function(e){
-            e.dataTransfer.setData("text", e.target.dataset.key);
-            e.target.style.backgroundColor = "black";
-            e.target.style.color = "white";
-            e.target.getElementsByClassName('storyid')[0].style.backgroundColor = 'black';
-        },
-        dragend:function(e){
-            e.target.style.backgroundColor = "white";
-            e.target.style.color = "black";
-            e.target.getElementsByClassName('storyid')[0].style.backgroundColor = 'white';
-        },
-        dragover:function(e){
-            e.preventDefault();
-        },
-        drop:function(e,stories){
-            e.preventDefault();
-            var key = e.dataTransfer.getData("text");
-            for(var i=0; i<e.path.length; i++){
-                var droptype = e.path[i].dataset.droptype;
-                if(typeof droptype !== 'undefined') break;
-            }
-            if(droptype === 'sprint'){ stories[key].status = 'toDo';}
-            else if(droptype === 'backlog'){ stories[key].status = 'backlog'; }
+        onEnd:function (e,storiesInSprint,storiesInBacklog) {
+
+            var storyKey = 0;
+            storiesInSprint.forEach(function (story, number) {
+                if(story.status === 'backlog'){ story.status = 'toDo';};
+                story.key = storyKey;
+                storyKey ++;
+            })
+
+            storiesInBacklog.forEach(function (story, number) {
+                if(story.status !== 'backlog'){ story.status = 'backlog';};
+                story.key = storyKey;
+                storyKey ++;
+            })
+
+            this.$root.$data.stories = storiesInSprint.concat(storiesInBacklog);
+
         }
     }
 })
@@ -347,6 +327,7 @@ Vue.component('add-story-form',{
     methods:{
         addstory:function(stories,projects,projlast,status){
             errmsg = '';
+            status = (status === 'inSprint') ? 'toDo' : status ;
             if(!this.proj || !this.descrip){
                 this.$data.errmsg = 'all fields required.'
             }else {
@@ -369,7 +350,7 @@ Vue.component('story-list-container',{
             listStyle: {position: 'relative', top: '0px', left: '0px'}
         }
     },
-    props:['stories','storiesInSprint','storiesInBacklog','title','status','projects','projlast','statusArray','detailStoryKey','droptype'],
+    props:['stories','storiesInSprint','storiesInBacklog','title','status','projects','projlast','detailStoryKey','droptype'],
     template:'<div v-bind:style="listStyle">\n' +
     '                <storylist-title v-bind:title="title"></storylist-title>\n' +
     '                <add-story-form v-bind:stories="stories" v-bind:status="status" v-bind:projects="projects" v-bind:projlast="projlast"></add-story-form>\n' +
@@ -381,8 +362,8 @@ Vue.component('backlog-tab',{
     data:function(){
         return {
             backlogtab:[
-                    {title:"TDC Sprint 35",status:"toDo",statusArray:['toDo','inProgress','qa','done'],droptype:"sprint"},
-                    {title:"Backlog",status:"backlog",statusArray:['backlog'],droptype:"backlog"}
+                    {title:"TDC Sprint 35",status:"inSprint",droptype:"sprint"},
+                    {title:"Backlog",status:"backlog",droptype:"backlog"}
                 ]
         }
     },
@@ -392,7 +373,6 @@ Vue.component('backlog-tab',{
     '                                  v-bind:title="list.title" v-bind:status="list.status"\n' +
     '                                  v-bind:projects="projects"\n' +
     '                                  v-bind:projlast="projlast"\n' +
-    '                                  v-bind:status-array="list.statusArray"\n' +
     '                                  v-bind:detail-story-key="detailStoryKey"\n' +
     '                                  v-bind:droptype="list.droptype">\n' +
     '            </story-list-container>' +

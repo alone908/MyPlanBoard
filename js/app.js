@@ -45,13 +45,13 @@ Vue.component('story-post-container',{
             styleObj: {position: 'relative', top: '0px', left: '0px', padding: '10px', height: '100%'}
         }
     },
-    props:['stories','display'],
+    props:['stories','storiesInBacklog','storiesInTodo','storiesInProgress','storiesInQa','storiesInDone'],
     template:'<div v-bind:style="styleObj">\n' +
-    '                <story-post-column v-bind:stories="stories" title="TO DO" status="toDo"></story-post-column>\n' +
-    '                <story-post-column v-bind:stories="stories" title="IN PROGRESS" status="inProgress"></story-post-column>\n' +
-    '                <story-post-column v-bind:stories="stories" title="IN QA" status="qa"></story-post-column>\n' +
-    '                <story-post-column v-bind:stories="stories" title="DONE" status="done"></story-post-column>\n' +
-    '            </div>'
+    '                <story-post-column v-bind:stories="stories" v-bind:stories-in-backlog="storiesInBacklog" v-bind:stories-in-todo="storiesInTodo" v-bind:stories-in-progress="storiesInProgress" v-bind:stories-in-qa="storiesInQa" v-bind:stories-in-done="storiesInDone" status="toDo"></story-post-column>\n' +
+    '                <story-post-column v-bind:stories="stories" v-bind:stories-in-backlog="storiesInBacklog" v-bind:stories-in-todo="storiesInTodo" v-bind:stories-in-progress="storiesInProgress" v-bind:stories-in-qa="storiesInQa" v-bind:stories-in-done="storiesInDone" status="inProgress"></story-post-column>\n' +
+    '                <story-post-column v-bind:stories="stories" v-bind:stories-in-backlog="storiesInBacklog" v-bind:stories-in-todo="storiesInTodo" v-bind:stories-in-progress="storiesInProgress" v-bind:stories-in-qa="storiesInQa" v-bind:stories-in-done="storiesInDone" status="qa"></story-post-column>\n' +
+    '                <story-post-column v-bind:stories="stories" v-bind:stories-in-backlog="storiesInBacklog" v-bind:stories-in-todo="storiesInTodo" v-bind:stories-in-progress="storiesInProgress" v-bind:stories-in-qa="storiesInQa" v-bind:stories-in-done="storiesInDone" status="done"></story-post-column>\n' +
+    '        </div>'
 })
 
 Vue.component('story-post-column',{
@@ -60,7 +60,7 @@ Vue.component('story-post-column',{
             columnStyle: {
                 display: 'inline-block',
                 width: '24%',
-                padding: '5px',
+                padding: '10px',
                 borderRadius: '5px',
                 border: '1px solid #D1D3D6',
                 height: '100%'
@@ -73,46 +73,85 @@ Vue.component('story-post-column',{
             imageStyle: {verticalAalign: 'text-bottom'}
         }
     },
-    props:['stories','title','status','detailStoryKey','droptype'],
+    props:['stories','storiesInBacklog','storiesInTodo','storiesInProgress','storiesInQa','storiesInDone','status','detailStoryKey'],
     methods:{
         clickPost:function(key,detailStoryKey){
             this.$root.$data.detailStoryKey = key;
         },
-        drag:function(e){
-            e.dataTransfer.setData("text", e.target.dataset.key);
-            e.target.style.backgroundColor = "black";
-            e.target.style.color = "white";
-            e.target.getElementsByTagName('th')[0].style.backgroundColor = "black";
-        },
-        dragend:function(e){
-            e.target.style.backgroundColor = "white";
-            e.target.style.color = "black";
-            e.target.getElementsByTagName('th')[0].style.backgroundColor = "#D1D3D6";
-        },
-        dragover:function(e){
-            e.preventDefault();
-        },
-        drop:function(e,stories){
-            e.preventDefault();
-            var key = e.dataTransfer.getData("text");
-            for(var i=0; i<e.path.length; i++){
-                var status = e.path[i].dataset.status;
-                if(typeof status !== 'undefined') break;
-            }
-            if(status === 'toDo'){ stories[key].status = 'toDo';}
-            else if(status === 'inProgress'){ stories[key].status = 'inProgress'; }
-            else if(status === 'qa'){ stories[key].status = 'qa'; }
-            else if(status === 'done'){ stories[key].status = 'done'; }
+        onEnd:function(e,storiesInBacklog,storiesInTodo,storiesInProgress,storiesInQa,storiesInDone){
+
+            var storyKey = 0;
+            storiesInTodo.forEach(function (story, number) {
+                if(story.status !== 'toDo'){ story.status = 'toDo';};
+                story.key = storyKey;
+                storyKey ++;
+            })
+
+            storiesInProgress.forEach(function (story, number) {
+                if(story.status !== 'inProgress'){ story.status = 'inProgress';};
+                story.key = storyKey;
+                storyKey ++;
+            })
+
+            storiesInQa.forEach(function (story, number) {
+                if(story.status !== 'qa'){ story.status = 'qa';};
+                story.key = storyKey;
+                storyKey ++;
+            })
+
+            storiesInDone.forEach(function (story, number) {
+                if(story.status !== 'done'){ story.status = 'done';};
+                story.key = storyKey;
+                storyKey ++;
+            })
+
+            this.$root.$data.stories = storiesInTodo.concat(storiesInProgress).concat(storiesInQa).concat(storiesInDone).concat(storiesInBacklog);
+
         }
     },
-    template:'<div v-on:drop="drop($event,stories)" v-on:dragover="dragover" :data-status="status" v-bind:style="columnStyle">\n' +
-    '                    <div class="alert alert-secondary" v-bind:style="titleStyle">{{title}}</div>\n' +
-    '                    <div v-for="story in stories" v-if="story.status === status" v-on:click="clickPost(story.key,detailStoryKey)" v-on:dragstart="drag" v-on:dragend="dragend" :data-key="story.key" draggable="true" v-bind:style="postStyle">\n' +
-    '                        <table v-bind:style="tableStyle">\n' +
-    '                            <tr><th v-bind:style="thStyle"><img src="images/storyicon.svg" v-bind:style="imageStyle">{{story.id}}</th></tr>\n' +
-    '                            <tr><td v-bind:style="tdStyle">{{story.description}}</td></tr>\n' +
-    '                        </table>\n' +
-    '                    </div>\n' +
+    template:'<div v-if="status === \'toDo\'" v-bind:style="columnStyle">\n' +
+    '                    <div class="alert alert-secondary" v-bind:style="titleStyle">TO DO</div>\n' +
+    '                    <draggable :list="storiesInTodo" :options="{group:\'storypost\'}" @end="onEnd($event,storiesInBacklog,storiesInTodo,storiesInProgress,storiesInQa,storiesInDone)" style="height:calc(100% - 68px);">' +
+    '                        <div v-for="story in storiesInTodo" v-on:click="clickPost(story.key,detailStoryKey)" :data-key="story.key" v-bind:style="postStyle">\n' +
+    '                            <table v-bind:style="tableStyle">\n' +
+    '                                <tr><th v-bind:style="thStyle"><img src="images/storyicon.svg" v-bind:style="imageStyle">{{story.id}}</th></tr>\n' +
+    '                                <tr><td v-bind:style="tdStyle">{{story.description}}</td></tr>\n' +
+    '                            </table>\n' +
+    '                        </div>\n' +
+    '                    </draggable>' +
+    '                </div>' +
+    '<div v-else-if="status === \'inProgress\'" v-bind:style="columnStyle">\n' +
+    '                    <div class="alert alert-secondary" v-bind:style="titleStyle">IN PROGRESS</div>\n' +
+    '                    <draggable :list="storiesInProgress" :options="{group:\'storypost\'}" @end="onEnd($event,storiesInBacklog,storiesInTodo,storiesInProgress,storiesInQa,storiesInDone)" style="height:calc(100% - 68px);">' +
+    '                        <div v-for="story in storiesInProgress" v-on:click="clickPost(story.key,detailStoryKey)" :data-key="story.key" v-bind:style="postStyle">\n' +
+    '                            <table v-bind:style="tableStyle">\n' +
+    '                                <tr><th v-bind:style="thStyle"><img src="images/storyicon.svg" v-bind:style="imageStyle">{{story.id}}</th></tr>\n' +
+    '                                <tr><td v-bind:style="tdStyle">{{story.description}}</td></tr>\n' +
+    '                            </table>\n' +
+    '                        </div>\n' +
+    '                    </draggable>' +
+    '                </div>' +
+    '<div v-else-if="status === \'qa\'" v-bind:style="columnStyle">\n' +
+    '                    <div class="alert alert-secondary" v-bind:style="titleStyle">IN QA</div>\n' +
+    '                    <draggable :list="storiesInQa" :options="{group:\'storypost\'}" @end="onEnd($event,storiesInBacklog,storiesInTodo,storiesInProgress,storiesInQa,storiesInDone)" style="height:calc(100% - 68px);">' +
+    '                        <div v-for="story in storiesInQa" v-on:click="clickPost(story.key,detailStoryKey)" :data-key="story.key" v-bind:style="postStyle">\n' +
+    '                            <table v-bind:style="tableStyle">\n' +
+    '                                <tr><th v-bind:style="thStyle"><img src="images/storyicon.svg" v-bind:style="imageStyle">{{story.id}}</th></tr>\n' +
+    '                                <tr><td v-bind:style="tdStyle">{{story.description}}</td></tr>\n' +
+    '                            </table>\n' +
+    '                        </div>\n' +
+    '                    </draggable>' +
+    '                </div>' +
+    '<div v-else-if="status === \'done\'" v-bind:style="columnStyle">\n' +
+    '                    <div class="alert alert-secondary" v-bind:style="titleStyle">DONE</div>\n' +
+    '                    <draggable :list="storiesInDone" :options="{group:\'storypost\'}" @end="onEnd($event,storiesInBacklog,storiesInTodo,storiesInProgress,storiesInQa,storiesInDone)" style="height:calc(100% - 68px);">' +
+    '                        <div v-for="story in storiesInDone" v-on:click="clickPost(story.key,detailStoryKey)" :data-key="story.key" v-bind:style="postStyle">\n' +
+    '                            <table v-bind:style="tableStyle">\n' +
+    '                                <tr><th v-bind:style="thStyle"><img src="images/storyicon.svg" v-bind:style="imageStyle">{{story.id}}</th></tr>\n' +
+    '                                <tr><td v-bind:style="tdStyle">{{story.description}}</td></tr>\n' +
+    '                            </table>\n' +
+    '                        </div>\n' +
+    '                    </draggable>' +
     '                </div>'
 })
 
@@ -205,7 +244,7 @@ Vue.component('story-list',{
             }
         }
     },
-    props:['stories','storiesInSprint','storiesInBacklog','title','status','detailStoryKey','droptype'],
+    props:['stories','storiesInSprint','storiesInBacklog','title','status','detailStoryKey'],
     template:'<draggable v-if="status === \'inSprint\'" :list="storiesInSprint" :options="{group:\'story\'}" @end="onEnd($event,storiesInSprint,storiesInBacklog)" v-bind:style="listStyle">' +
     '                    <div v-for="story in storiesInSprint" :key="story.key" :status="status" v-bind:style="itemStyle" v-on:click="clicklist(story.key,detailStoryKey)">\n' +
     '                        <div v-bind:style="contStyle">\n' +
@@ -350,11 +389,11 @@ Vue.component('story-list-container',{
             listStyle: {position: 'relative', top: '0px', left: '0px'}
         }
     },
-    props:['stories','storiesInSprint','storiesInBacklog','title','status','projects','projlast','detailStoryKey','droptype'],
+    props:['stories','storiesInSprint','storiesInBacklog','title','status','projects','projlast','detailStoryKey'],
     template:'<div v-bind:style="listStyle">\n' +
     '                <storylist-title v-bind:title="title"></storylist-title>\n' +
     '                <add-story-form v-bind:stories="stories" v-bind:status="status" v-bind:projects="projects" v-bind:projlast="projlast"></add-story-form>\n' +
-    '                <story-list v-bind:stories="stories" v-bind:stories-in-sprint="storiesInSprint" v-bind:stories-in-backlog="storiesInBacklog" v-bind:title="title" v-bind:status="status" v-bind:detail-story-key="detailStoryKey" v-bind:droptype="droptype"></story-list>\n' +
+    '                <story-list v-bind:stories="stories" v-bind:stories-in-sprint="storiesInSprint" v-bind:stories-in-backlog="storiesInBacklog" v-bind:title="title" v-bind:status="status" v-bind:detail-story-key="detailStoryKey"></story-list>\n' +
     '            </div>'
 })
 
@@ -362,8 +401,8 @@ Vue.component('backlog-tab',{
     data:function(){
         return {
             backlogtab:[
-                    {title:"TDC Sprint 35",status:"inSprint",droptype:"sprint"},
-                    {title:"Backlog",status:"backlog",droptype:"backlog"}
+                    {title:"TDC Sprint 35",status:"inSprint"},
+                    {title:"Backlog",status:"backlog"}
                 ]
         }
     },
@@ -373,8 +412,7 @@ Vue.component('backlog-tab',{
     '                                  v-bind:title="list.title" v-bind:status="list.status"\n' +
     '                                  v-bind:projects="projects"\n' +
     '                                  v-bind:projlast="projlast"\n' +
-    '                                  v-bind:detail-story-key="detailStoryKey"\n' +
-    '                                  v-bind:droptype="list.droptype">\n' +
+    '                                  v-bind:detail-story-key="detailStoryKey">\n' +
     '            </story-list-container>' +
     '</div>'
 })
@@ -389,7 +427,7 @@ var app = new Vue({
                 template: '<backlog-tab v-bind:stories="stories" v-bind:stories-in-sprint="storiesInSprint" v-bind:stories-in-backlog="storiesInBacklog" v-bind:projects="projects" v-bind:projlast="projlast" v-bind:detail-story-key="detailStoryKey"></backlog-tab>'
             },
             'story-post-container': {
-                template: '<story-post-container v-bind:stories="stories"></story-post-container>'
+                template: '<story-post-container v-bind:stories="stories" v-bind:stories-in-backlog="storiesInBacklog" v-bind:stories-in-todo="storiesInTodo" v-bind:stories-in-progress="storiesInProgress" v-bind:stories-in-qa="storiesInQa" v-bind:stories-in-done="storiesInDone"></story-post-container>'
             }
         },
         stories:[
@@ -451,6 +489,38 @@ var app = new Vue({
         },
         storiesInBacklog: function () {
             var status = ['backlog'];
+            var list = [];
+            this.stories.map(function(story){
+                if(status.indexOf(story.status) !== -1) list.push(story);
+            })
+            return list;
+        },
+        storiesInTodo: function () {
+            var status = ['toDo'];
+            var list = [];
+            this.stories.map(function(story){
+                if(status.indexOf(story.status) !== -1) list.push(story);
+            })
+            return list;
+        },
+        storiesInProgress: function () {
+            var status = ['inProgress'];
+            var list = [];
+            this.stories.map(function(story){
+                if(status.indexOf(story.status) !== -1) list.push(story);
+            })
+            return list;
+        },
+        storiesInQa: function () {
+            var status = ['qa'];
+            var list = [];
+            this.stories.map(function(story){
+                if(status.indexOf(story.status) !== -1) list.push(story);
+            })
+            return list;
+        },
+        storiesInDone: function () {
+            var status = ['done'];
             var list = [];
             this.stories.map(function(story){
                 if(status.indexOf(story.status) !== -1) list.push(story);

@@ -61,19 +61,29 @@ app
         opacity: 0;
     }
     .sortable-chosen{
-        background-color: black;
-        color: white;
+        background-color: black !important;
+        color: white !important;
+        position: relative;
+        left: -5px;
+    }
+    .sortable-ghost {
+        background-color: black !important;
+        color: white !important;
+        position: relative;
         left: -5px;
     }
     .sortable-chosen > .storyid > span{
-        background-color: black;
-        color: white;
+        background-color: black !important;
+        color: white !important;
     }
-    .sortable-ghost {
-        background-color: black;
-        color: white;
-        left: -5px;
+    .sortable-chosen > table {
+        border-left: 2px solid red !important;
     }
+    .sortable-chosen > table > tr > th{
+        background-color: black !important;
+        color: white !important;
+    }
+
 </style>
 
 <div id="app">
@@ -89,6 +99,10 @@ app
                            v-bind:stories="stories"
                            v-bind:stories-in-sprint="storiesInSprint"
                            v-bind:stories-in-backlog="storiesInBacklog"
+                           v-bind:stories-in-todo="storiesInTodo"
+                           v-bind:stories-in-progress="storiesInProgress"
+                           v-bind:stories-in-qa="storiesInQa"
+                           v-bind:stories-in-done="storiesInDone"
                            v-bind:projects="projects"
                            v-bind:projlast="projlast"
                            v-bind:detail-story-key="detailStoryKey">
